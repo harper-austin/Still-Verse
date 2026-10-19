@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#334435" />
+  <title>Still — a verse for this moment</title>
+  <style>
+    :root { color-scheme: light; --forest:#334435; --moss:#69765b; --earth:#80654c; --cream:#f4f0e5; --paper:#fbf8f0; --ink:#30372c; --muted:#777666; }
+    * { box-sizing:border-box }
+    html,body { min-height:100%; margin:0 }
+    body { background:var(--cream); color:var(--ink); font-family: Georgia, 'Times New Roman', serif; }
+    main { min-height:100svh; display:grid; place-items:center; padding:28px; cursor:pointer; touch-action:pan-y; outline:none; }
+    .shell { width:min(100%, 760px); min-height:min(690px, calc(100svh - 56px)); border-radius:8px; background:var(--paper); box-shadow:0 18px 70px #40362612; position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:72px clamp(25px, 8vw, 88px) 78px; text-align:center; }
+    .shell:before,.shell:after { content:""; position:absolute; width:230px; height:230px; border:1px solid #a5a58925; border-radius:50%; pointer-events:none }
+    .shell:before { top:-155px; left:-96px; box-shadow:18px 18px 0 18px #a5a5890b, 34px 34px 0 34px #a5a58909 }
+    .shell:after { bottom:-185px; right:-116px; box-shadow:-18px -18px 0 18px #a5a5890b, -34px -34px 0 34px #a5a58909 }
+    .brand { position:absolute; top:34px; display:flex; align-items:center; gap:9px; color:var(--forest); font:600 12px/1.2 system-ui,sans-serif; letter-spacing:.2em; text-transform:uppercase }
+    .leaf { color:var(--moss); font-size:18px }
+    .eyebrow { margin:0 0 30px; color:var(--earth); font:600 11px/1.4 system-ui,sans-serif; letter-spacing:.18em; text-transform:uppercase }
+    blockquote { margin:0; max-width:550px; font-size:clamp(27px, 5vw, 43px); line-height:1.35; font-weight:400; letter-spacing:-.025em; }
+    .reference { margin:30px 0 0; color:var(--forest); font:600 13px/1.5 system-ui,sans-serif; letter-spacing:.14em; text-transform:uppercase }
+    .hint { position:absolute; bottom:38px; color:var(--muted); font:12px/1.5 system-ui,sans-serif; letter-spacing:.04em }
+    .counter { position:absolute; bottom:38px; right:clamp(24px, 5vw, 48px); color:#999584; font:11px system-ui,sans-serif; font-variant-numeric:tabular-nums }
+    .notice { position:fixed; z-index:2; bottom:12px; left:12px; right:12px; margin:auto; width:max-content; max-width:calc(100% - 24px); padding:8px 12px; border-radius:20px; color:#f8f4e9; background:#334435eF; font:11px/1.4 system-ui,sans-serif; text-align:center }
+    @media(max-width:520px) { main{padding:12px}.shell{min-height:calc(100svh - 24px);padding:76px 24px 82px}.hint{bottom:30px;font-size:11px}.counter{bottom:30px} }
+    @media(prefers-reduced-motion:no-preference) { blockquote,.reference { transition:opacity .18s ease, transform .18s ease } .changing blockquote,.changing .reference { opacity:0; transform:translateY(5px) } }
+  </style>
+</head>
+<body>
+  <main id="reader" tabindex="0" role="button" aria-label="Show another verse. Tap, click, or swipe.">
+    <section class="shell" aria-live="polite" aria-atomic="true">
+      <div class="brand"><span class="leaf" aria-hidden="true">❧</span> Still</div>
+      <p class="eyebrow">A quiet moment in the Word</p>
+      <blockquote id="text"></blockquote>
+      <p class="reference" id="reference"></p>
+      <p class="hint">Tap anywhere or swipe for another verse</p>
+      <span class="counter" id="counter" aria-hidden="true"></span>
+    </section>
+  </main>
+  <div class="notice" role="note">Prototype · sample text only · not ESV</div>
+  <script>
+    // Demo content is original placeholder copy, not quoted Bible text.
+    // Replace loadVerse() with a call to your authorized ESV API integration.
+    const samples = [
+      { reference: "Psalm 46:10", text: "Make room for stillness; remember that you are held by the One who is greater than every storm." },
+      { reference: "Proverbs 3:5–6", text: "Trust the path beyond what you can see, and let wisdom guide each next step." },
+      { reference: "Matthew 6:34", text: "Meet today with care. Tomorrow can wait for its own morning." },
+      { reference: "Isaiah 41:10", text: "When fear draws near, you do not stand alone; strength and help are with you." },
+      { reference: "Philippians 4:6–7", text: "Bring every worry into prayer, and let a peace deeper than understanding guard your heart." },
+      { reference: "Psalm 23:1", text: "You are guided and cared for; you have what you need for this moment." },
+      { reference: "Lamentations 3:22–23", text: "Mercy meets you again with the morning, faithful and new." },
+      { reference: "Romans 15:13", text: "May hope fill you with joy and peace as you place your trust in God." }
+    ];
+    const reader = document.querySelector('#reader');
+    const shell = document.querySelector('.shell');
+    let current = -1;
+    function loadVerse() {
+      // ESV hookup: request one passage from a small preselected reference list
+      // through your own server endpoint. Keep the API token on that server.
+      // Render the response's passage and required copyright attribution.
+      let next;
+      do { next = Math.floor(Math.random() * samples.length); } while (samples.length > 1 && next === current);
+      current = next;
+      const verse = samples[current];
+      shell.classList.add('changing');
+      window.setTimeout(() => {
+        document.querySelector('#text').textContent = verse.text;
+        document.querySelector('#reference').textContent = verse.reference;
+        document.querySelector('#counter').textContent = `${current + 1} / ${samples.length}`;
+        shell.classList.remove('changing');
+      }, 120);
+    }
+    reader.addEventListener('click', loadVerse);
+    reader.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); loadVerse(); } });
+    let touchStart = null;
+    reader.addEventListener('touchstart', event => { touchStart = event.changedTouches[0].clientX; }, {passive:true});
+    reader.addEventListener('touchend', event => { if (touchStart !== null && Math.abs(event.changedTouches[0].clientX - touchStart) > 45) loadVerse(); touchStart = null; }, {passive:true});
+    let pointerStart = null;
+    reader.addEventListener('pointerdown', event => { if (event.pointerType !== 'touch') pointerStart = {x:event.clientX,y:event.clientY}; });
+    reader.addEventListener('pointerup', event => { if (pointerStart && Math.abs(event.clientX-pointerStart.x)>45 && Math.abs(event.clientY-pointerStart.y)<90) loadVerse(); pointerStart=null; });
+    loadVerse();
+  </script>
+</body>
+</html>
